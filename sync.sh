@@ -74,6 +74,7 @@ while read -r obj; do
   eval "rsync --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt | tail -n +9 > \"$fileListDir/$fileListName-file-list.txt\""
 
   # File existence / removal check
+  echo "Comparing file list to existing files..." | tee -a "$logDir"/last_run.txt
   fileDel=0
   declare -A preexistingFiles # Only used/populated for custom comparisons, so these files are skipped by transformations
   for existFile in "$localDir"/*; do
