@@ -36,6 +36,7 @@ The following config specifies two transformations and the requisite parameters 
       "script": "./7z_extract_cleanup.sh",
       "params": [
         "<outdir>",
+        "<arg:ext_remote>",
         "<arg:rm_file>"
       ]
     },

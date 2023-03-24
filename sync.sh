@@ -38,7 +38,7 @@ syncOffset=$(jq -r '.sync_time_offset_seconds // 0' sync.json)
 remoteUrl=$(jq -r '.remote_url' sync.json)
 
 if [[ "$remoteUrl" == "null" ]]; then
-  echo "ERROR: Remote URL not specified. Add a value to the 'remoteUrl' key in 'sync.json' that is a valid rsync data source (SSH, rsync, another local folder, etc.)"
+  echo "ERROR: Remote URL not specified. Add a value to the 'remote_url' key in 'sync.json' that is a valid rsync data source (SSH, rsync, another local folder, etc.)"
   exit 1
 fi
 
@@ -137,7 +137,7 @@ while read -r obj; do
           done < <(echo "$compObj" | jq -r '.params[]')
           break
         fi
-      done < <(jq -c '.comparisons[] // []')
+      done < <(jq -c '.comparisons[] // []' sync.json)
 
       if [[ -z "$cmd" ]]; then
         echo "ERROR: Comparison script not found. Exiting..." | tee -a "$logDir"/last_run.txt
