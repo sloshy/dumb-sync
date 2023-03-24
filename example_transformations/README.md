@@ -70,6 +70,12 @@ The following config specifies two transformations and the requisite parameters 
       "transforms": ["7z", "chd"],
       "cleanup": ["7z-cleanup", "chd-cleanup"],
       "comparison": "expected_ext",
+      "include": [
+        "*.zip"
+      ],
+      "exclude": [
+        "*"
+      ],
       "ext_remote": "zip",
       "ext_local": "chd",
       "rm_file": true
@@ -79,7 +85,10 @@ The following config specifies two transformations and the requisite parameters 
 ```
 
 The above config will take the `rm_file` property from the current `config` and extract each individual archive to the output folder.
-The input file extension is set to `zip` and the output to `chd`, so that the sync script can keep track of which files were synchronized properly after transformation.
+Note the `include` and `exclude` arrays; they specify that I only want to include files that end in `.zip`, and I want to exclude all other files.
+This helps if the remote directory also contains files other than the ones I want, by letting me set a pattern.
+Includes have priority over excludes, so be sure to specify "`*`" for excludes if you only want to include files that match certain patterns.
+Also, the input file extension is set to `zip` and the output to `chd`, so that the sync script can keep track of which files were synchronized properly after transformation.
 
 The end result is that the synchronized directory will be kept in-sync with the remote, by comparing the file names according to the specified extensions, and keeping track of when a sync was last performed to determine if the file should be updated.
 
