@@ -3,7 +3,7 @@
   "log_dir": ".",
   "file_list_dir": ".",
   "sync_time_offset_seconds": 0,
-  "transforms": [
+  "transformations": [
     {
       "name": "example_script",
       "script": "./example-script.sh",
@@ -18,7 +18,7 @@
       "sudo": true
     }
   ],
-  "cleanup_transforms": [],
+  "cleanup_transformations": [],
   "comparisons": [
     {
       "name": "expected_ext",

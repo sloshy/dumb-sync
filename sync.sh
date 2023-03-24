@@ -19,8 +19,8 @@ while read -r obj; do
   needsSudo=$(echo "$obj" | jq -r '.sudo // false')
   [[ "$needsSudo" = "true" ]] && break
 done < <(
-  jq -c '.transforms[]' sync.json
-  jq -c '.cleanup_transforms[]' sync.json
+  jq -c '.transformations[]' sync.json
+  jq -c '.cleanup_transformations[]' sync.json
 )
 
 if [[ "$needsSudo" == "true" ]]; then
@@ -259,8 +259,8 @@ while read -r obj; do
             [[ "$needsSudo" == "true" ]] && cmd="echo $sudoPass | $cmd"
             eval "$cmd" | tee -a "$logDir"/last_run.txt
           fi
-        done < <(jq -c '.transforms[]' sync.json)
-      done < <(echo "$obj" | jq -r '.transform[]')
+        done < <(jq -c '.transformations[]' sync.json)
+      done < <(echo "$obj" | jq -r '.transforms[]')
     fi
   done
 
@@ -309,7 +309,7 @@ while read -r obj; do
 
           eval "$cmd" | tee -a "$logDir"/last_run.txt
         fi
-      done < <(jq -c '.cleanup_transforms[]' sync.json)
+      done < <(jq -c '.cleanup_transformations[]' sync.json)
     done < <(echo "$obj" | jq -r '.cleanup[]')
   fi
 done < <(jq -c '.configs[]' sync.json)
