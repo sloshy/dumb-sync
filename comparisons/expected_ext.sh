@@ -10,7 +10,7 @@ LOCAL_EXT=$4
 LAST_SYNC_TIME_SECS=$5
 SYNC_OFFSET_SECS=$6
 
-FILE_LOCAL_BASE=$(basename -- "$FILE_LOCAL" "$LOCAL_EXT")
+FILE_LOCAL_BASE=$(basename -- "$FILE_LOCAL" ".$LOCAL_EXT")
 
 # (Date) (Time) (Filename)
 FILE_LINE_REGEX="\b([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.*)\b"

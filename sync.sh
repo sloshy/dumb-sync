@@ -125,13 +125,13 @@ while read -r obj; do
               ;;
 
             "<arg:"*)
-              trueArg=$(echo "$param" | sed -e "s/<arg://" -e "s/>//")
+              trueArg=$(echo "$compParam" | sed -e "s/<arg://" -e "s/>//")
               getArg=$(echo "$obj" | jq -r ".$trueArg")
               cmd="$cmd \"$getArg\""
               ;;
 
             *)
-              cmd="$cmd \"$param\""
+              cmd="$cmd \"$compParam\""
               ;;
             esac
           done < <(echo "$compObj" | jq -r '.params[]')
