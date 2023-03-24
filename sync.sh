@@ -153,6 +153,7 @@ while read -r obj; do
       "current")
         # We want to exclude files that are 'current' but probably transformed
         exclude="$exclude--exclude=\"$existFileBase\" "
+        fileExists=true
         preexistingFiles["$existFile"]=1
         ;;
       "updated")
