@@ -54,6 +54,7 @@ Required settings are as follows:
 Each sync config in the `config` array requires the following options:
 * `remote` - An additional suffix to append to the base `remote_url` specified above. For example, if you are syncing from `rsync://some.remote.server/files/`, you could add `some/dir/` to make the final sync URL equal `rsync://some.remote.server/files/some/dir/`.
 * `local` - The local directory to sync files to. It is recommended to **not** use the current directory as some settings can cause the sync program to inadvertedly remove program files. Also, any trailing slashes are stripped and implied at runtime.
+* `disabled` - Whether to run the current config. Defaults to `false`, but can be set to `true` to skip the current config.
 
 You can also supply these optional settings:
 * `exclude` - An array of rsync-compatible exclusions for the current sync config. For example, a setting of `["Something*", "*Something"]` will exclude files that start and end with the string `Something` in their name.

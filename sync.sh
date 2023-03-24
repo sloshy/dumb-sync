@@ -49,6 +49,14 @@ while read -r obj; do
   remote=$(echo "$obj" | jq -r '.remote')
   localDirConf=$(echo "$obj" | jq -r '.local')
   localDir=${localDirConf%/}
+
+  disabled=$(echo "$obj" | jq -r '.disabled // false')
+
+  if [[ "$disabled" == "true" ]]; then
+    echo "Skipping disabled config (Remote: $remote) (Local: $localDir)" | tee -a "$logDir"/last_run.txt
+    break
+  fi
+
   fileListName=${localDir//\//_} # Replaces forward slashes with underscores
   transformCount=$(echo "$obj" | jq -r '.transforms // [] | length')
   transforms=$(echo "$obj" | jq -c '.transforms // []' | sed -e 's/\[\]/\(none\)/' -e's/"//g' -e 's/,/ -> /g' -e 's/\[//' -e 's/\]//')
