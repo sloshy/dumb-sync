@@ -144,7 +144,10 @@ while read -r obj; do
         exit 1
       fi
 
+      set +e
       cmdResult=$(eval "$cmd")
+      set -e
+
       case $cmdResult in
       "missing")
         # Do nothing at this time

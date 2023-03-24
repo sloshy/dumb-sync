@@ -17,8 +17,6 @@ FILE_LINE_REGEX="\b([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.*
 
 set +e
 FILE_LINE=$(grep "$FILE_LOCAL_BASE.$REMOTE_EXT" "$FILE_LIST")
-set -e
-
 if [[ "$?" -eq 0 ]]; then
   if [[ "$FILE_LINE" =~ $FILE_LINE_REGEX ]]; then
     FILE_DATE=${BASH_REMATCH[1]}
