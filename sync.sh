@@ -42,6 +42,9 @@ if [[ "$remoteUrl" == "null" ]]; then
   exit 1
 fi
 
+preexistingFilesDir=$(mktemp -d)
+trap 'rm -rf -- "$preexistingFilesDir"'
+
 while read -r obj; do
   remote=$(echo "$obj" | jq -r '.remote')
   localDirConf=$(echo "$obj" | jq -r '.local')
@@ -62,6 +65,8 @@ while read -r obj; do
     include="$include--include=\"$incl\" "
   done < <(echo "$obj" | jq -r '.include // [] | .[]')
 
+  preexistingFilesList="$preexistingFilesDir"/"$fileListName"
+
   echo "= = = = = = = = = =" | tee -a "$logDir"/last_run.txt
   echo " " | tee -a "$logDir"/last_run.txt
   echo "Syncing remote ($remote), To Local: ($localDir)" | tee -a "$logDir"/last_run.txt
@@ -76,7 +81,7 @@ while read -r obj; do
   # File existence / removal check
   echo "Comparing file list to existing files..." | tee -a "$logDir"/last_run.txt
   fileDel=0
-  declare -A preexistingFiles # Only used/populated for custom comparisons, so these files are skipped by transformations
+
   for existFile in "$localDir"/*; do
     [[ -f "$existFile" ]] || break
     fileExists=false
@@ -152,14 +157,14 @@ while read -r obj; do
       case $cmdResult in
       "missing")
         # Do nothing at this time
-        # If files are set to be removed, this will be removed later, else included in preexistingFiles
+        # If files are set to be removed, this will be removed later, else included in preexistingFilesList
         ;;
       "current"*)
         # We want to exclude files that are 'current' but probably transformed
         remoteFileName=${cmdResult#current }
         exclude="$exclude--exclude=\"$remoteFileName\" "
         fileExists=true
-        preexistingFiles["$existFile"]=1
+        echo "$existFile" >>"$preexistingFilesList"
         ;;
       "updated")
         fileUpdated="true"
@@ -188,7 +193,7 @@ while read -r obj; do
       fileDel=$((fileDel + 1))
     elif [[ "$fileExists" == "false" ]]; then
       # For the case where files are "missing" but present locally, but not set to be removed, they're marked preexisting
-      preexistingFiles["$existFile"]=1
+      echo "$existFile" >>"$preexistingFilesList"
     fi
   done
   [[ $rmMissingFiles = true ]] && echo "Deleted $fileDel files" | tee -a "$logDir"/last_run.txt
@@ -201,7 +206,7 @@ while read -r obj; do
     [[ -f "$f" ]] || break
 
     # Checks if the file is marked as preexisting and should not be transformed
-    if ! [[ -v preexistingFiles[$f] ]]; then
+    if ! grep -q "$f" "$preexistingFilesList"; then
       while read -r tName; do
         while read -r tObj; do
           name=$(echo "$tObj" | jq -r '.name')
