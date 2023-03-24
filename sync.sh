@@ -202,6 +202,8 @@ while read -r obj; do
 
     # Checks if the file is marked as preexisting and should not be transformed
     if [[ -v preexistingFiles[$f] ]]; then
+      # Do nothing if file is preexisting
+    else
       while read -r tName; do
         while read -r tObj; do
           name=$(echo "$tObj" | jq -r '.name')
