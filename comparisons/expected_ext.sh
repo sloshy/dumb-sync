@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # COPYRIGHT 2023 Ryan Peters
-# This script version is licensed for your use via the terms of LGPL v3
+# This script version is licensed for your use via the terms of LGPL v2.1
 # See: https://github.com/sloshy/dumb-sync/LICENSE
 
 FILE_LIST=$1
