@@ -43,7 +43,7 @@ if [[ "$remoteUrl" == "null" ]]; then
 fi
 
 preexistingFilesDir=$(mktemp -d)
-trap 'rm -rf -- "$preexistingFilesDir"'
+trap 'rm -rf -- "$preexistingFilesDir"' EXIT
 
 while read -r obj; do
   remote=$(echo "$obj" | jq -r '.remote')
