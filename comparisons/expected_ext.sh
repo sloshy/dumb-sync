@@ -21,10 +21,11 @@ if [[ "$?" -eq 0 ]]; then
   if [[ "$FILE_LINE" =~ $FILE_LINE_REGEX ]]; then
     FILE_DATE=${BASH_REMATCH[1]}
     FILE_TIME=${BASH_REMATCH[2]}
+    FILE_NAME=${BASH_REMATCH[3]}
     FILE_SECS=$(date -d "$FILE_DATE $FILE_TIME" +%s)
     FILE_SECS_OFFSET=$((FILE_SECS + SYNC_OFFSET_SECS))
     if [[ "$LAST_SYNC_TIME_SECS" -le "$FILE_SECS_OFFSET" ]]; then
-      echo "updated"
+      echo "updated $FILE_NAME"
     else
       echo "current"
     fi

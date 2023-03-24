@@ -154,9 +154,10 @@ while read -r obj; do
         # Do nothing at this time
         # If files are set to be removed, this will be removed later, else included in preexistingFiles
         ;;
-      "current")
+      "current"*)
         # We want to exclude files that are 'current' but probably transformed
-        exclude="$exclude--exclude=\"$existFileBase\" "
+        remoteFileName=${cmdResult#current }
+        exclude="$exclude--exclude=\"$remoteFileName\" "
         fileExists=true
         preexistingFiles["$existFile"]=1
         ;;

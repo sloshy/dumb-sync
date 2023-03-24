@@ -93,7 +93,7 @@ These keywords available for transformations are as follows:
 * `<last_sync_time_secs>` - The UNIX epoch timestamp in seconds-since-1970-01-01 that the last sync was performed. Useful for keeping transformed files in sync with remote ones when local file timestamps might not be reliable (for example, if you are syncing a file that might become modified for unrelated reasons, that you would prefer to sync from scratch each time).
 * `<current_time_secs>` - The current timestamp (same format as above).
 * `<sync_offset_secs>` - The number of seconds of the sync offset defined in your root config. Typically 0, but could be different, so for some scripts you want to make sure you include this parameter any time you are dealing with time offsets.
-* `<arg:some_arg>` - The literal value of the property `some_arg` in the current config. Can be used to pass per-config settings into the script that might vary based on your use-cases. For example, to get the expected starting file extension (if defined), use `<arg:ext_in>` to copy the value of `ext_in` as an argument to the script.
+* `<arg:some_arg>` - The literal value of the property `some_arg` in the current config. Can be used to pass per-config settings into the script that might vary based on your use-cases. For example, to get the expected starting file extension (if defined), use `<arg:ext_remote>` to copy the value of `ext_remote` as an argument to the script.
 * You can also supply literal text to have it passed verbatim as an argument.
 
 For some ideas on how you can configure the transformations, see the [example transformations](/example_transformations/) directory.
@@ -112,6 +112,8 @@ To configure a comparison, simply add an object much like a `transformation` or 
 
 A single comparison can be set for each sync configuration, unlike transformations or cleanup transformations.
 This single script will be ran if defined, and its return value must be either `missing`, `current`, or `updated` for every file in the output directory.
+For the `current` case, it actually needs to be specified as `current <remote_file_name>`, where `<remote_file_name>` is the name of the file you are deriving your final, local file from after all your transformations.
+This is so that the sync script can explicitly exclude this file from sync.
 
 If a comparison is not specified, only removing nonexistent files is taken into account if specified, so be sure to specify a comparison if your local output directory is likely not a 1:1 match to your remote folder.
 
