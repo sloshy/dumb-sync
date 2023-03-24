@@ -25,9 +25,9 @@ if [[ "$?" -eq 0 ]]; then
     FILE_SECS=$(date -d "$FILE_DATE $FILE_TIME" +%s)
     FILE_SECS_OFFSET=$((FILE_SECS + SYNC_OFFSET_SECS))
     if [[ "$LAST_SYNC_TIME_SECS" -le "$FILE_SECS_OFFSET" ]]; then
-      echo "updated $FILE_NAME"
+      echo "updated"
     else
-      echo "current"
+      echo "current $FILE_NAME"
     fi
   else
     exit 1
