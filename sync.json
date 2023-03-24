@@ -1,0 +1,54 @@
+{
+  "remote_url": "me@localhost:/my/dir/",
+  "log_dir": ".",
+  "file_list_dir": ".",
+  "sync_time_offset_seconds": 0,
+  "transforms": [
+    {
+      "name": "example_script",
+      "script": "./example-script.sh",
+      "params": [
+        "<outdir>",
+        "<outdir_abs>",
+        "<filename_remote>",
+        "<filename_remote_base>",
+        "<arg:some_property>",
+        "Arbitrary Text"
+      ],
+      "sudo": true
+    }
+  ],
+  "cleanup_transforms": [],
+  "comparisons": [
+    {
+      "name": "expected_ext",
+      "script": "./comparisons/expected_ext.sh",
+      "params": [
+        "<file_list>",
+        "<filename_local>",
+        "<arg:ext_remote>",
+        "<arg:ext_local>",
+        "<last_sync_time_secs>",
+        "<sync_offset_secs>"
+      ]
+    }
+  ],
+  "configs": [
+    {
+      "remote": "some/dir/",
+      "local": "local/dir/",
+      "transforms": [
+        "example-script"
+      ],
+      "comparison": "expected_ext",
+      "some_property": "This will be pulled in as an arg",
+      "ext_remote": "zip",
+      "ext_local": "chd"
+    },
+    {
+      "remote": "some/other/dir/",
+      "local": "other/local/dir/",
+      "rm_missing": false
+    }
+  ]
+}
