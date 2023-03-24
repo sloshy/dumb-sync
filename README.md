@@ -45,7 +45,7 @@ For a more fleshed-out example, see the [example_transformations](/example_trans
 ## Configuration
 To use the sync script, you need a configuration file with the proper settings.
 Required settings are as follows:
-* `remote_urls` - An array of objects defining rsync-compatible location for files. Can be another directory on this local machine, or an rsync-compatible URL such as `rsync://some-host/`. For syncing folders, **be sure this ends in a trailing slash**.
+* `remote_url` - An rsync-compatible location for files. Can be another directory on this local machine, or an rsync-compatible URL such as `rsync://some-host/`. For syncing folders, **be sure this ends in a trailing slash**.
 * `log_dir` - The directory for storing log files. Defaults to the current directory if not set. Trailing slashes are stripped and implied at runtime.
 * `file_list_dir` - The directory for storing rsync file lists. Defaults to `log_dir` if not set. Trailing slashes are stripped and implied at runtime.
 * `sync_offset_seconds` - A number of seconds to offset date-time checking for transformed files. This defaults to 0, and file times should usually be preserved across remote and local directories, so you almost never need to modify this.
