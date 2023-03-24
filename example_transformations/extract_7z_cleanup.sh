@@ -15,7 +15,7 @@ OUT_DIR_CLEAN=${OUT_DIR%/}
 [[ "$RM_FILE" = true || "$RM_FILE" = false ]] || RM_FILE="true"
 
 for f in "$OUT_DIR_CLEAN"/*."$EXT"; do
-  [[ -f "$OUT_DIR_CLEAN"/*."$EXT" ]] || break
+  [[ -f "$f" ]] || break
   7z e "$f" -o"$OUT_DIR"
   if [ $RM_FILE = true ]; then
     rm -f "$f"
