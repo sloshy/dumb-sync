@@ -186,7 +186,7 @@ while read -r obj; do
       # Default comparison logic
       # Saving some cycles by relying on rsync's built-in file updating
       # This means we only need to worry about missing files, as updated files will be handled automatically
-      if grep -q "$existFileBase" "$fileListDir/$fileListName-file-list.txt"; then
+      if grep -Fq "$existFileBase" "$fileListDir/$fileListName-file-list.txt"; then
         fileExists=true
       fi
     fi
@@ -214,7 +214,7 @@ while read -r obj; do
     [[ -f "$f" ]] || break
 
     # Checks if the file is marked as preexisting and should not be transformed
-    if ! grep -q "$f" "$preexistingFilesList"; then
+    if ! grep -Fq "$f" "$preexistingFilesList"; then
       while read -r tName; do
         while read -r tObj; do
           name=$(echo "$tObj" | jq -r '.name')

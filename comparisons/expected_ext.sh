@@ -16,7 +16,7 @@ FILE_LOCAL_BASE=$(basename -- "$FILE_LOCAL" ".$LOCAL_EXT")
 FILE_LINE_REGEX="\b([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.*)\b"
 
 set +e
-FILE_LINE=$(grep "$FILE_LOCAL_BASE.$REMOTE_EXT" "$FILE_LIST")
+FILE_LINE=$(grep -F "$FILE_LOCAL_BASE.$REMOTE_EXT" "$FILE_LIST")
 if [[ "$?" -eq 0 ]]; then
   if [[ "$FILE_LINE" =~ $FILE_LINE_REGEX ]]; then
     FILE_DATE=${BASH_REMATCH[1]}
