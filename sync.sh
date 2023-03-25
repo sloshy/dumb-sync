@@ -54,7 +54,7 @@ while read -r obj; do
 
   if [[ "$disabled" == "true" ]]; then
     echo "Skipping disabled config (Remote: $remote) (Local: $localDir)" | tee -a "$logDir"/last_run.txt
-    break
+    continue
   fi
 
   fileListName=${localDir//\//_} # Replaces forward slashes with underscores
