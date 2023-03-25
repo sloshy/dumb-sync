@@ -33,5 +33,11 @@ if [[ "$?" -eq 0 ]]; then
     exit 1
   fi
 else
-  echo "missing"
+  # See if the file is just not transformed yet
+  BASE_WITHOUT_REMOTE=${FILE_LOCAL_BASE%"$REMOTE_EXT"}
+  if grep -Fq "$BASE_WITHOUT_REMOTE" "$FILE_LIST"; then
+    echo "transform"
+  else
+    echo "missing"
+  fi
 fi

@@ -178,6 +178,10 @@ while read -r obj; do
         "updated")
           fileUpdated="true"
           ;;
+        "transform")
+          fileExists=true
+          echo "File '$existFile' is present but not transformed yet. Will transform after sync." | tee -a "$logDir"/last_run.txt
+          ;;
         *)
           echo "Comparison script '$cmd' had invalid response '$cmdResult'. Exiting..." | tee -a "$logDir"/last_run.txt
           exit 1

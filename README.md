@@ -112,7 +112,14 @@ The included example config specifies [one such script](/comparisons/expected_ex
 To configure a comparison, simply add an object much like a `transformation` or `cleanup_transformation` object inside the `comparisons` array, and configure it in the same sort of way, with the same options, except for `sudo` which is not supported for comparisons intentionally.
 
 A single comparison can be set for each sync configuration, unlike transformations or cleanup transformations.
-This single script will be ran if defined, and its return value must be either `missing`, `current`, or `updated` for every file in the output directory.
+This single script will be ran if defined, and its return value must be either `missing`, `transform`, `current`, or `updated` for every file in the output directory.
+Each case has certain properties:
+
+* `missing` - This file is present locally, but not on the remote destination. Will be removed if `rm_missing` is enabled.
+* `transform` - This file is present locally, but it is still in its initial state. Will not exclude the file from syncing if it's updated and will transform as normal.
+* `current` - This file is derived/transformed from a remote file, and it is up-to-date. It is excluded from sync and per-file transformations.
+* `updated` - This file is derived/transformed from a remote file, but it is not up-to-date with the remote source. It will be deleted, redownloaded, and transformed again.
+
 For the `current` case, it actually needs to be specified as `current <remote_file_name>`, where `<remote_file_name>` is the name of the file you are deriving your final, local file from after all your transformations.
 This is so that the sync script can explicitly exclude this file from sync.
 
