@@ -62,9 +62,14 @@ You can also supply these optional settings:
 * `transforms` - An array of the names of transformation scripts to apply in-order. These are ran on a per-file basis.
 * `cleanup` - An array of the names of cleanup transformation scripts to apply in-order. These are ran once at the end of synchronizing files.
 * `comparison` - The name of a `comparison` script to run for determining whether or not a file is `missing`, `updated`, or `current`. An example is defined in this repository for keeping files with modified extensions in sync with the originals, defined in more detail below.
+* `max_size_bytes` - The upper limit in file size for syncing. Files over this size in bytes will not be synced.
+* `min_size_bytes` - The lower limit in file size for syncing. Files under this size in bytes will not be synced.
 * `rm_missing` - A boolean flag for whether or not to remove files that are available locally but missing from the remote sync directory. Defaults to false, but should usually be set to `true` for cases where you want to keep a clean sync directory.
 
-You can also supply arbitrary properties for usage as transformation parameters, described below.
+For the `max_size_bytes`/`min_size_bytes` options, this only affects syncing and it does not affect the file lists used for comparisons.
+This means, for example, if you have a file locally that has the same name as a file being excluded due to the size limit, it will not be deleted if you also specify `rm_missing`.
+
+You can also supply arbitrary properties for usage as transformation and comparison parameters, described below.
 
 ### Transformations
 

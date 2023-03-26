@@ -57,6 +57,8 @@ while read -r obj; do
     continue
   fi
 
+  maxSizeBytes=$(echo "$obj" | jq -r '.max_size_bytes')
+  minSizeBytes=$(echo "$obj" | jq -r '.min_size_bytes')
   fileListName=${localDir//\//_} # Replaces forward slashes with underscores
   transformCount=$(echo "$obj" | jq -r '.transforms // [] | length')
   transforms=$(echo "$obj" | jq -c '.transforms // []' | sed -e 's/\[\]/\(none\)/' -e's/"//g' -e 's/,/ -> /g' -e 's/\[//' -e 's/\]//')
@@ -83,139 +85,163 @@ while read -r obj; do
   echo "Cleanup steps: $cleanups" | tee -a "$logDir"/last_run.txt
   echo "Include args: $include" | tee -a "$logDir"/last_run.txt
   echo "Exclude args: $exclude" | tee -a "$logDir"/last_run.txt
-  echo "Getting file list..." | tee -a "$logDir"/last_run.txt
-  eval "rsync --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt | tail -n +9 > \"$fileListDir/$fileListName-file-list.txt\""
-
-  # File existence / removal check
-  if [[ "$comparison" != "null" ]] || [[ "$rmMissingFiles" == "true" ]]; then
-    echo "Comparing file list to existing files..." | tee -a "$logDir"/last_run.txt
-    fileDel=0
-
-    for existFile in "$localDir"/*; do
-      [[ -f "$existFile" ]] || break
-      fileExists=false
-      fileUpdated=false
-      existFileBase=$(basename -- "$existFile")
-      if [ "$comparison" != "null" ]; then
-        # Attempt to compare with a user-defined comparison script
-        cmd=""
-        while read -r compObj; do
-          compName=$(echo "$compObj" | jq -r '.name')
-          compScript=$(echo "$compObj" | jq -r '.script')
-
-          if [[ "$comparison" == "$compName" ]]; then
-            cmd="$compScript"
-            while read -r compParam; do
-              case $compParam in
-              "<outdir>")
-                cmd="$cmd \"$localDir\"/"
-                ;;
-
-              "<outdir_abs>")
-                cmd="$cmd \"$(pwd)/$localDir\""
-                ;;
-
-              "<file_list>")
-                cmd="$cmd \"$fileListDir/$fileListName-file-list.txt\""
-                ;;
-
-              "<filename_local>")
-                cmd="$cmd \"$existFile\""
-                ;;
-
-              "<filename_local_base>")
-                cmd="$cmd \"$existFileBase\""
-                ;;
-
-              "<last_sync_time_secs>")
-                cmd="$cmd \"$lastRunSecs\""
-                ;;
-
-              "<current_time_secs>")
-                cmd="$cmd \"$(date +%s)\""
-                ;;
-
-              "<sync_offset_secs>")
-                cmd="$cmd \"$syncOffset\""
-                ;;
-
-              "<arg:"*)
-                trueArg=$(echo "$compParam" | sed -e "s/<arg://" -e "s/>//")
-                getArg=$(echo "$obj" | jq -r ".$trueArg")
-                cmd="$cmd \"$getArg\""
-                ;;
-
-              *)
-                cmd="$cmd \"$compParam\""
-                ;;
-              esac
-            done < <(echo "$compObj" | jq -r '.params[]')
-            break
-          fi
-        done < <(jq -c '.comparisons[] // []' sync.json)
-
-        if [[ -z "$cmd" ]]; then
-          echo "ERROR: Comparison script not found. Exiting..." | tee -a "$logDir"/last_run.txt
-          exit 1
-        fi
-
-        set +e
-        cmdResult=$(eval "$cmd")
-        set -e
-
-        case $cmdResult in
-        "missing")
-          # Do nothing at this time
-          # If files are set to be removed, this will be removed later, else included in preexistingFilesList
-          ;;
-        "current"*)
-          # We want to exclude files that are 'current' but probably transformed
-          remoteFileName=${cmdResult#current }
-          exclude="$exclude--exclude=\"$remoteFileName\" "
-          fileExists=true
-          echo "$existFile" >>"$preexistingFilesList"
-          ;;
-        "updated")
-          fileUpdated="true"
-          ;;
-        "transform")
-          fileExists=true
-          echo "File '$existFile' is present but not transformed yet. Will transform after sync." | tee -a "$logDir"/last_run.txt
-          ;;
-        *)
-          echo "Comparison script '$cmd' had invalid response '$cmdResult'. Exiting..." | tee -a "$logDir"/last_run.txt
-          exit 1
-          ;;
-        esac
-      elif [[ "$rmMissingFiles" == "true" ]]; then
-        # Default comparison logic
-        # Saving some cycles by relying on rsync's built-in file updating
-        # This means we only need to worry about missing files, as updated files will be handled automatically
-        if grep -Fq "$existFileBase" "$fileListDir/$fileListName-file-list.txt"; then
-          fileExists=true
-        fi
-      fi
-
-      if [[ "$fileExists" == "false" ]] && [[ $rmMissingFiles = true ]]; then
-        echo "Deleting nonexistent file: $existFile" | tee -a "$logDir"/last_run.txt
-        rm -f "$existFile"
-        fileDel=$((fileDel + 1))
-      elif [[ "$fileUpdated" == "true" ]]; then
-        echo "File $existFile is updated. Deleting and redownloading." | tee -a "$logDir"/last_run.txt
-        rm -f "$existFile"
-        fileDel=$((fileDel + 1))
-      elif [[ "$fileExists" == "false" ]]; then
-        # For the case where files are "missing" but present locally, but not set to be removed, they're marked preexisting
-        echo "$existFile" >>"$preexistingFilesList"
-      fi
-    done
-    [[ $rmMissingFiles = true ]] && echo "Deleted $fileDel files" | tee -a "$logDir"/last_run.txt
+  if [[ "$maxSizeBytes" != "null" ]]; then
+    echo "Max size: $maxSizeBytes bytes" | tee -a "$logDir"/last_run.txt
   else
-    echo "Skipping file check (no comparison or 'rm_missing' option specified)..." | tee -a "$logDir"/last_run.txt
+    echo "Max size not specified." | tee -a "$logDir"/last_run.txt
+  fi
+  if [[ "$minSizeBytes" != "null" ]]; then
+    echo "Min size: $minSizeBytes bytes" | tee -a "$logDir"/last_run.txt
+  else
+    echo "Min size not specified." | tee -a "$logDir"/last_run.txt
+  fi
+  if [[ "$comparison" == "null" ]] && [[ "$transformCount" -eq 0 ]] && [[ "$cleanupCount" -eq 0 ]] && [[ "$rmMissingFiles" != "true" ]]; then
+    echo "Skipping file list (no comparisons, transformations, cleanup, or removals specified)" | tee -a "$logDir"/last_run.txt
+  else
+    echo "Getting file list..." | tee -a "$logDir"/last_run.txt
+    eval "rsync --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt | tail -n +9 > \"$fileListDir/$fileListName-file-list.txt\""
+
+    # File existence / removal check
+    if [[ "$comparison" != "null" ]] || [[ "$rmMissingFiles" == "true" ]]; then
+      echo "Comparing file list to existing files..." | tee -a "$logDir"/last_run.txt
+      fileDel=0
+
+      for existFile in "$localDir"/*; do
+        [[ -f "$existFile" ]] || break
+        fileExists=false
+        fileUpdated=false
+        existFileBase=$(basename -- "$existFile")
+        if [ "$comparison" != "null" ]; then
+          # Attempt to compare with a user-defined comparison script
+          cmd=""
+          while read -r compObj; do
+            compName=$(echo "$compObj" | jq -r '.name')
+            compScript=$(echo "$compObj" | jq -r '.script')
+
+            if [[ "$comparison" == "$compName" ]]; then
+              cmd="$compScript"
+              while read -r compParam; do
+                case $compParam in
+                "<outdir>")
+                  cmd="$cmd \"$localDir\"/"
+                  ;;
+
+                "<outdir_abs>")
+                  cmd="$cmd \"$(pwd)/$localDir\""
+                  ;;
+
+                "<file_list>")
+                  cmd="$cmd \"$fileListDir/$fileListName-file-list.txt\""
+                  ;;
+
+                "<filename_local>")
+                  cmd="$cmd \"$existFile\""
+                  ;;
+
+                "<filename_local_base>")
+                  cmd="$cmd \"$existFileBase\""
+                  ;;
+
+                "<last_sync_time_secs>")
+                  cmd="$cmd \"$lastRunSecs\""
+                  ;;
+
+                "<current_time_secs>")
+                  cmd="$cmd \"$(date +%s)\""
+                  ;;
+
+                "<sync_offset_secs>")
+                  cmd="$cmd \"$syncOffset\""
+                  ;;
+
+                "<arg:"*)
+                  trueArg=$(echo "$compParam" | sed -e "s/<arg://" -e "s/>//")
+                  getArg=$(echo "$obj" | jq -r ".$trueArg")
+                  cmd="$cmd \"$getArg\""
+                  ;;
+
+                *)
+                  cmd="$cmd \"$compParam\""
+                  ;;
+                esac
+              done < <(echo "$compObj" | jq -r '.params[]')
+              break
+            fi
+          done < <(jq -c '.comparisons[] // []' sync.json)
+
+          if [[ -z "$cmd" ]]; then
+            echo "ERROR: Comparison script not found. Exiting..." | tee -a "$logDir"/last_run.txt
+            exit 1
+          fi
+
+          set +e
+          cmdResult=$(eval "$cmd")
+          set -e
+
+          case $cmdResult in
+          "missing")
+            # Do nothing at this time
+            # If files are set to be removed, this will be removed later, else included in preexistingFilesList
+            ;;
+          "current"*)
+            # We want to exclude files that are 'current' but probably transformed
+            remoteFileName=${cmdResult#current }
+            exclude="$exclude--exclude=\"$remoteFileName\" "
+            fileExists=true
+            echo "$existFile" >>"$preexistingFilesList"
+            ;;
+          "updated")
+            fileUpdated="true"
+            ;;
+          "transform")
+            fileExists=true
+            echo "File '$existFile' is present but not transformed yet. Will transform after sync." | tee -a "$logDir"/last_run.txt
+            ;;
+          *)
+            echo "Comparison script '$cmd' had invalid response '$cmdResult'. Exiting..." | tee -a "$logDir"/last_run.txt
+            exit 1
+            ;;
+          esac
+        elif [[ "$rmMissingFiles" == "true" ]]; then
+          # Default comparison logic
+          # Saving some cycles by relying on rsync's built-in file updating
+          # This means we only need to worry about missing files, as updated files will be handled automatically
+          if grep -Fq "$existFileBase" "$fileListDir/$fileListName-file-list.txt"; then
+            fileExists=true
+          fi
+        fi
+
+        if [[ "$fileExists" == "false" ]] && [[ $rmMissingFiles = true ]]; then
+          echo "Deleting nonexistent file: $existFile" | tee -a "$logDir"/last_run.txt
+          rm -f "$existFile"
+          fileDel=$((fileDel + 1))
+        elif [[ "$fileUpdated" == "true" ]]; then
+          echo "File $existFile is updated. Deleting and redownloading." | tee -a "$logDir"/last_run.txt
+          rm -f "$existFile"
+          fileDel=$((fileDel + 1))
+        elif [[ "$fileExists" == "false" ]]; then
+          # For the case where files are "missing" but present locally, but not set to be removed, they're marked preexisting
+          echo "$existFile" >>"$preexistingFilesList"
+        fi
+      done
+      [[ $rmMissingFiles = true ]] && echo "Deleted $fileDel files" | tee -a "$logDir"/last_run.txt
+    else
+      echo "Skipping file check (no comparison or 'rm_missing' option specified)..." | tee -a "$logDir"/last_run.txt
+    fi
   fi
 
   #Sync
-  eval "rsync -hav$include$exclude\"$remoteUrl$remote/\" \"$localDir/\" | tee -a \"$logDir\"/last_run.txt"
+  if [[ "$maxSizeBytes" != "null" ]]; then
+    maxSizeArg=" --max-size=\"$maxSizeBytes\""
+  else
+    maxSizeArg=""
+  fi
+  if [[ "$minSizeBytes" != "null" ]]; then
+    minSizeArg=" --min-size=\"$minSizeBytes\""
+  else
+    minSizeArg=""
+  fi
+  eval "rsync -hav$maxSizeArg$minSizeArg$include$exclude\"$remoteUrl$remote/\" \"$localDir/\" | tee -a \"$logDir\"/last_run.txt"
 
   #Transforms
   [[ "$transformCount" -gt 0 ]] && for f in "$localDir"/*; do
