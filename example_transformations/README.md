@@ -18,7 +18,8 @@ The following config specifies two transformations and the requisite parameters 
       "params": [
         "<filename_in>",
         "<outdir>",
-        "<arg:rm_file>"
+        "<arg:rm_file>",
+        "<arg:overwrite>"
       ]
     },
     {
@@ -45,7 +46,8 @@ The following config specifies two transformations and the requisite parameters 
       "script": "./chd.sh",
       "params": [
         "<outdir_abs>",
-        "true"
+        "true",
+        "<arg:overwrite>"
       ]
     }
   ],
@@ -78,7 +80,8 @@ The following config specifies two transformations and the requisite parameters 
       ],
       "ext_remote": "zip",
       "ext_local": "chd",
-      "rm_file": true
+      "rm_file": true,
+      "overwrite": true
     }
   ]
 }
@@ -98,11 +101,12 @@ Below are details on the included example scripts, with information on how they 
 Extracts a file using 7zip (p7zip on POSIX systems) on the command line.
 Usage:
 ```
-./extract_7z.sh <in_file> <out_dir> <rm_archive>
+./extract_7z.sh <in_file> <out_dir> <rm_archive> <overwrite>
 ```
 The file specified as `<in_file>` is extracted with all of its contents to the specified `<out_dir>`.
 If `<rm_archive>` is set to `true`, it will also remove the original archive file.
 This can be very useful if, for example, you are synchronizing a directory of archives that you wish to extract first.
+Also, if you wish to always overwrite local files on extraction (recommended for most cases), set the `<overwrite>` parameter to true.
 
 **Important**: If you extract an archive into the same directory, be sure to set the `ext_remote` and `ext_local` options so the main 
 sync script can keep track of the file names as the extensions change.
@@ -113,7 +117,7 @@ If you would like to preserve the file structure, simply edit the script to use 
 ## 7z_extract_cleanup
 A modified version of the above script that extracts every file in a directory, rather than a single file.
 ```
-./extract_7z_cleanup.sh <dir> <rm_archive>
+./extract_7z_cleanup.sh <dir> <rm_archive> <overwrite>
 ```
 All of the same notes and caveats apply as above.
 

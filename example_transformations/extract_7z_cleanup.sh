@@ -8,15 +8,22 @@ set -e
 OUT_DIR=$1
 EXT=$2
 RM_FILE=$3
+OVERWRITE=$4
 
 OUT_DIR_CLEAN=${OUT_DIR%/}
 
 #Set default for removing file (true)
 [[ "$RM_FILE" = true || "$RM_FILE" = false ]] || RM_FILE="true"
 
+EXTRA_CMD=""
+
+if [[ "$OVERWRITE" == "true" ]]; then
+  EXTRA_CMD="-aoa "
+fi
+
 for f in "$OUT_DIR_CLEAN"/*."$EXT"; do
   [[ -f "$f" ]] || break
-  7z e "$f" -o"$OUT_DIR"
+  7z e "$f" $EXTRA_CMD-o"$OUT_DIR"
   if [ $RM_FILE = true ]; then
     rm -f "$f"
   fi
