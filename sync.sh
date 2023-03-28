@@ -95,6 +95,7 @@ while read -r obj; do
   done < <(echo "$obj" | jq -r '.include // [] | .[]')
 
   preexistingFilesList="$preexistingFilesDir"/"$fileListName"
+  touch "$preexistingFilesList"
 
   echo "= = = = = = = = = =" | tee -a "$logDir"/last_run.txt
   echo " " | tee -a "$logDir"/last_run.txt
@@ -269,6 +270,7 @@ while read -r obj; do
     [[ -f "$f" ]] || break
 
     # Checks if the file is marked as preexisting and should not be transformed
+    echo "$preexistingFilesList"
     if ! grep -Fq "$f" "$preexistingFilesList"; then
       while read -r tName; do
         while read -r tObj; do
