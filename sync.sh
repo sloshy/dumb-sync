@@ -98,7 +98,7 @@ while read -r obj; do
 
   echo "= = = = = = = = = =" | tee -a "$logDir"/last_run.txt
   echo " " | tee -a "$logDir"/last_run.txt
-  echo "Syncing remote ($remoteUrlName -- $remote), To Local: ($localDir)" | tee -a "$logDir"/last_run.txt
+  echo "Syncing remote ($remoteUrlName -- $remote), To Local: ($localDirConf)" | tee -a "$logDir"/last_run.txt
   mkdir -p "$localDir"
   echo "Transform steps: $transforms" | tee -a "$logDir"/last_run.txt
   echo "Cleanup steps: $cleanups" | tee -a "$logDir"/last_run.txt
