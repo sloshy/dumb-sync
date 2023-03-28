@@ -68,7 +68,7 @@ while read -r obj; do
   disabled=$(echo "$obj" | jq -r '.disabled // false')
 
   if [[ "$disabled" == "true" ]]; then
-    echo "Skipping disabled config (Remote: $remote) (Local: $localDir)" | tee -a "$logDir"/last_run.txt
+    echo "Skipping disabled config (Remote: $remote) (Local: $localDirConf)" | tee -a "$logDir"/last_run.txt
     continue
   fi
 
