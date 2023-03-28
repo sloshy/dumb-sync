@@ -1,5 +1,10 @@
 {
-  "remote_url": "me@localhost:/my/dir/",
+  "remote_urls": [
+    {
+      "name": "My Server",
+      "url": "me@localhost:/my/dir/prefix/"
+    }
+  ],
   "log_dir": ".",
   "file_list_dir": ".",
   "sync_time_offset_seconds": 0,
@@ -35,6 +40,7 @@
   ],
   "configs": [
     {
+      "url_name": "My Server",
       "remote": "some/dir/",
       "local": "local/dir/",
       "transforms": [

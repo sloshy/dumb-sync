@@ -45,18 +45,23 @@ For a more fleshed-out example, see the [example_transformations](/example_trans
 ## Configuration
 To use the sync script, you need a configuration file with the proper settings.
 Required settings are as follows:
-* `remote_url` - An rsync-compatible location for files. Can be another directory on this local machine, or an rsync-compatible URL such as `rsync://some-host/`. For syncing folders, **be sure this ends in a trailing slash**.
+* `remote_url` or `remote_urls` - One or more rsync-compatible locations for files. Can be another directory on this local machine, or an rsync-compatible URL such as `rsync://some-host/` or `me@example.com:/some/dir/`. For syncing folders, **be sure this ends in a trailing slash**. If you have a single URL, specify it as `remote_url` and by default all of your configs will use this url for syncing. For multiple URLs, you can create an object in an array named `remote_urls` to designate the URL with a name.
 * `log_dir` - The directory for storing log files. Defaults to the current directory if not set. Trailing slashes are stripped and implied at runtime.
 * `file_list_dir` - The directory for storing rsync file lists. Defaults to `log_dir` if not set. Trailing slashes are stripped and implied at runtime.
 * `sync_offset_seconds` - A number of seconds to offset date-time checking for transformed files. This defaults to 0, and file times should usually be preserved across remote and local directories, so you almost never need to modify this.
 * `configs` - An array of individual sync configs, described below.
 
-Each sync config in the `config` array requires the following options:
+Each URL defined in `remote_urls` has two required parameters:
+* `name` - A friendly name for the URL, for selecting in each of your configs.
+* `url` - The rsync URL of the location you are syncing from.
+
+Each sync config in the `configs` array requires the following options:
 * `remote` - An additional suffix to append to the base `remote_url` specified above. For example, if you are syncing from `rsync://some.remote.server/files/`, you could add `some/dir/` to make the final sync URL equal `rsync://some.remote.server/files/some/dir/`.
 * `local` - The local directory to sync files to. It is recommended to **not** use the current directory as some settings can cause the sync program to inadvertedly remove program files. Also, any trailing slashes are stripped and implied at runtime.
 * `disabled` - Whether to run the current config. Defaults to `false`, but can be set to `true` to skip the current config.
 
 You can also supply these optional settings:
+* `url_name` - A specific remote URL to use. If specified, uses the URL as named in the `remote_urls` array in the root of the config. If not specified, your config will use the default URL specified in `remote_url` if defined. Otherwise, it will fail.
 * `exclude` - An array of rsync-compatible exclusions for the current sync config. For example, a setting of `["Something*", "*Something"]` will exclude files that start and end with the string `Something` in their name.
 * `include` - An array of rsync-compatible includions for the current sync config, for usage in conjunction with exclusions above. These are applied before exclusions.
 * `transforms` - An array of the names of transformation scripts to apply in-order. These are ran on a per-file basis.

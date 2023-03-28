@@ -35,17 +35,32 @@ logDir=${logDirConf%/}
 fileListDirConf=$(jq -r ".file_list_dir // \"$logDir\"" sync.json)
 fileListDir=${fileListDirConf%/}
 syncOffset=$(jq -r '.sync_time_offset_seconds // 0' sync.json)
-remoteUrl=$(jq -r '.remote_url' sync.json)
-
-if [[ "$remoteUrl" == "null" ]]; then
-  echo "ERROR: Remote URL not specified. Add a value to the 'remote_url' key in 'sync.json' that is a valid rsync data source (SSH, rsync, another local folder, etc.)"
-  exit 1
-fi
+defaultRemoteUrl=$(jq -r '.remote_url' sync.json)
 
 preexistingFilesDir=$(mktemp -d)
 trap 'rm -rf -- "$preexistingFilesDir"' EXIT
 
 while read -r obj; do
+  remoteUrlName=$(echo "$obj" | jq -r '.url_name')
+
+  if [[ "$remoteUrlName" == "null" ]]; then
+    remoteUrl="$defaultRemoteUrl"
+    remoteUrlName="(default)"
+  else
+    while read -r remoteUrlConf; do
+      confName=$(echo "$remoteUrlConf" | jq -r '.name')
+      if [[ "$confName" == "$remoteUrlName" ]]; then
+        remoteUrl=$(echo "$remoteUrlConf" | jq -r '.url')
+        break
+      fi
+    done < <(jq -c '.remote_urls[] // []' sync.json)
+  fi
+
+  if [[ "$remoteUrl" == "null" ]]; then
+    echo "ERROR: Remote URL not specified. Add a value to the 'remote_url' key in 'sync.json' that is a valid rsync data source (SSH, rsync, another local folder, etc.)"
+    exit 1
+  fi
+
   remote=$(echo "$obj" | jq -r '.remote')
   localDirConf=$(echo "$obj" | jq -r '.local')
   localDir=${localDirConf%/}
@@ -69,17 +84,21 @@ while read -r obj; do
   exclude=" "
   include=" "
   while read -r excl; do
-    exclude="$exclude--exclude=\"$excl\" "
+    # Ensure dollar signs and double quotes are escaped
+    exclEsc=$(echo "$excl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+    exclude="$exclude--exclude=\"$exclEsc\" "
   done < <(echo "$obj" | jq -r '.exclude // [] | .[]')
   while read -r incl; do
-    include="$include--include=\"$incl\" "
+    # Ensure dollar signs and double quotes are escaped
+    inclEsc=$(echo "$incl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+    include="$include--include=\"$inclEsc\" "
   done < <(echo "$obj" | jq -r '.include // [] | .[]')
 
   preexistingFilesList="$preexistingFilesDir"/"$fileListName"
 
   echo "= = = = = = = = = =" | tee -a "$logDir"/last_run.txt
   echo " " | tee -a "$logDir"/last_run.txt
-  echo "Syncing remote ($remote), To Local: ($localDir)" | tee -a "$logDir"/last_run.txt
+  echo "Syncing remote ($remoteUrlName -- $remote), To Local: ($localDir)" | tee -a "$logDir"/last_run.txt
   mkdir -p "$localDir"
   echo "Transform steps: $transforms" | tee -a "$logDir"/last_run.txt
   echo "Cleanup steps: $cleanups" | tee -a "$logDir"/last_run.txt
@@ -186,7 +205,9 @@ while read -r obj; do
           "current"*)
             # We want to exclude files that are 'current' but probably transformed
             remoteFileName=${cmdResult#current }
-            exclude="$exclude--exclude=\"$remoteFileName\" "
+            # Ensure dollar signs and double quotes are escaped
+            exclEsc=$(echo "$remoteFileName" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+            exclude="$exclude--exclude=\"$exclEsc\" "
             fileExists=true
             echo "$existFile" >>"$preexistingFilesList"
             ;;
