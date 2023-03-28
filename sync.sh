@@ -85,13 +85,13 @@ while read -r obj; do
   include=" "
   while read -r excl; do
     # Ensure dollar signs and double quotes are escaped
-    exclEsc=$(echo "$excl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
-    exclude="$exclude--exclude=\"$exclEsc\" "
+    # exclEsc=$(echo "$excl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+    exclude="$exclude--exclude=\"$excl\" "
   done < <(echo "$obj" | jq -r '.exclude // [] | .[]')
   while read -r incl; do
     # Ensure dollar signs and double quotes are escaped
-    inclEsc=$(echo "$incl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
-    include="$include--include=\"$inclEsc\" "
+    # inclEsc=$(echo "$incl" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+    include="$include--include=\"$incl\" "
   done < <(echo "$obj" | jq -r '.include // [] | .[]')
 
   preexistingFilesList="$preexistingFilesDir"/"$fileListName"
@@ -206,8 +206,8 @@ while read -r obj; do
             # We want to exclude files that are 'current' but probably transformed
             remoteFileName=${cmdResult#current }
             # Ensure dollar signs and double quotes are escaped
-            exclEsc=$(echo "$remoteFileName" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
-            exclude="$exclude--exclude=\"$exclEsc\" "
+            # exclEsc=$(echo "$remoteFileName" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
+            exclude="$exclude--exclude=\"$remoteFileName\" "
             fileExists=true
             echo "$existFile" >>"$preexistingFilesList"
             ;;
