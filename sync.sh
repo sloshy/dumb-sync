@@ -327,6 +327,9 @@ while read -r obj; do
             needsSudo=$(echo "$tObj" | jq -r '.sudo // false')
             [[ "$needsSudo" == "true" ]] && cmd="echo $sudoPass | $cmd"
             eval "$cmd" | tee -a "$logDir"/last_run.txt
+            if [[ "${PIPESTATUS[0]}" -gt 0 ]]; then
+              exit 1
+            fi
           fi
         done < <(jq -c '.transformations[]' sync.json)
       done < <(echo "$obj" | jq -r '.transforms[]')
@@ -377,6 +380,9 @@ while read -r obj; do
           [[ "$needsSudo" = "true" ]] && cmd="echo $sudoPass | $cmd"
 
           eval "$cmd" | tee -a "$logDir"/last_run.txt
+          if [[ "${PIPESTATUS[0]}" -gt 0 ]]; then
+            exit 1
+          fi
         fi
       done < <(jq -c '.cleanup_transformations[]' sync.json)
     done < <(echo "$obj" | jq -r '.cleanup[]')
