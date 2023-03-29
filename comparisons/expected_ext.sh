@@ -31,8 +31,10 @@ if [[ "$?" -eq 0 ]]; then
       FILE_SECS_OFFSET=$((FILE_SECS + SYNC_OFFSET_SECS))
       if [[ "$LAST_SYNC_TIME_SECS" -le "$FILE_SECS_OFFSET" ]]; then
         echo "updated"
+        exit 0
       else
         echo "current $FILE_NAME"
+        exit 0
       fi
     else
       exit 1
@@ -42,15 +44,19 @@ if [[ "$?" -eq 0 ]]; then
   BASE_WITHOUT_REMOTE=${FILE_LOCAL_BASE%"$REMOTE_EXT"}
   if grep -Fq "$BASE_WITHOUT_REMOTE" "$FILE_LIST"; then
     echo "transform"
+    exit 0
   else
     echo "missing"
+    exit 0
   fi
 else
   # See if the file is just not transformed yet
   BASE_WITHOUT_REMOTE=${FILE_LOCAL_BASE%"$REMOTE_EXT"}
   if grep -Fq "$BASE_WITHOUT_REMOTE" "$FILE_LIST"; then
     echo "transform"
+    exit 0
   else
     echo "missing"
+    exit 0
   fi
 fi
