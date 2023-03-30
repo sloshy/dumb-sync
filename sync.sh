@@ -294,13 +294,13 @@ while read -r obj; do
                 ;;
 
               "<filename_remote>")
-                fClean=$(echo "$existFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
+                fClean=$(echo "$f" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                 cmd="$cmd \"$fClean\""
                 ;;
 
               "<filename_remote_base>")
                 basefile=$(basename -- "$f")
-                basefileClean=$(echo "$existFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
+                basefileClean=$(echo "$baseFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                 cmd="$cmd \"$basefileClean\""
                 ;;
 
