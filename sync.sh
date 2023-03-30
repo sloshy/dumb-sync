@@ -155,11 +155,13 @@ while read -r obj; do
                   ;;
 
                 "<filename_local>")
-                  cmd="$cmd \"$existFile\""
+                  existFileClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/$/\$/g')
+                  cmd="$cmd \"$existFileClean\""
                   ;;
 
                 "<filename_local_base>")
-                  cmd="$cmd \"$existFileBase\""
+                  existFileBaseClean=$(echo "$existFileBase" | sed -e 's/"/\"/g' -e 's/$/\$/g')
+                  cmd="$cmd \"$existFileBaseClean\""
                   ;;
 
                 "<last_sync_time_secs>")
@@ -292,12 +294,14 @@ while read -r obj; do
                 ;;
 
               "<filename_remote>")
-                cmd="$cmd \"$f\""
+                fClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/$/\$/g')
+                cmd="$cmd \"$fClean\""
                 ;;
 
               "<filename_remote_base>")
                 basefile=$(basename -- "$f")
-                cmd="$cmd \"$basefile\""
+                basefileClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/$/\$/g')
+                cmd="$cmd \"$basefileClean\""
                 ;;
 
               "<arg:"*)
