@@ -155,12 +155,12 @@ while read -r obj; do
                   ;;
 
                 "<filename_local>")
-                  existFileClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/\$/\\$/g')
+                  existFileClean=$(echo "$existFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                   cmd="$cmd \"$existFileClean\""
                   ;;
 
                 "<filename_local_base>")
-                  existFileBaseClean=$(echo "$existFileBase" | sed -e 's/"/\"/g' -e 's/\$/\\$/g')
+                  existFileBaseClean=$(echo "$existFileBase" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                   cmd="$cmd \"$existFileBaseClean\""
                   ;;
 
@@ -294,13 +294,13 @@ while read -r obj; do
                 ;;
 
               "<filename_remote>")
-                fClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/\$/\\$/g')
+                fClean=$(echo "$existFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                 cmd="$cmd \"$fClean\""
                 ;;
 
               "<filename_remote_base>")
                 basefile=$(basename -- "$f")
-                basefileClean=$(echo "$existFile" | sed -e 's/"/\"/g' -e 's/\$/\\$/g')
+                basefileClean=$(echo "$existFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                 cmd="$cmd \"$basefileClean\""
                 ;;
 
