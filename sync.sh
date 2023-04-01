@@ -210,7 +210,8 @@ while read -r obj; do
             remoteFileName=${cmdResult#current }
             # Ensure dollar signs and double quotes are escaped
             # exclEsc=$(echo "$remoteFileName" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
-            exclude="$exclude--exclude=\"$remoteFileName\" "
+            remoteFileNameClean=$(echo "$remoteFileName" | sed -e 's/\[//g' -e 's/\]//g')
+            exclude="$exclude--exclude=\"$remoteFileNameClean\" "
             fileExists=true
             echo "$existFile" >>"$preexistingFilesList"
             ;;
