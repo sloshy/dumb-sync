@@ -210,7 +210,7 @@ while read -r obj; do
             remoteFileName=${cmdResult#current }
             # Ensure dollar signs and double quotes are escaped
             # exclEsc=$(echo "$remoteFileName" | sed -e "s/\$/\\\$/g" -e "s/\"/\\\"/g")
-            remoteFileNameClean=$(echo "$remoteFileName" | sed -e 's/\[//g' -e 's/\]//g' -e 's/\$/\\$/g')
+            remoteFileNameClean=$(echo "$remoteFileName" | sed -e 's/\[/\\[/g' -e 's/\]/\\]/g' -e 's/\$/\\$/g')
             if [[ "$remoteFileNameClean" != "$remoteFileName" ]]; then
               echo "File '$remoteFileName' is being excluded from results as '$remoteFileNameClean' due to rsync pattern rules." | tee -a "$logDir"/last_run.txt
             fi
