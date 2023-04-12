@@ -119,7 +119,7 @@ while read -r obj; do
     echo "Skipping file list (no comparisons, transformations, cleanup, or removals specified)" | tee -a "$logDir"/last_run.txt
   else
     echo "Getting file list..." | tee -a "$logDir"/last_run.txt
-    eval "rsync --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt | tail -n +9 > \"$fileListDir/$fileListName-file-list.txt\""
+    eval "rsync --no-motd --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt > \"$fileListDir/$fileListName-file-list.txt\""
 
     # File existence / removal check
     if [[ "$comparison" != "null" ]] || [[ "$rmMissingFiles" == "true" ]]; then
