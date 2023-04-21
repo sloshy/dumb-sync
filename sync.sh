@@ -121,6 +121,14 @@ while read -r obj; do
     echo "Getting file list..." | tee -a "$logDir"/last_run.txt
     eval "rsync --no-motd --list-only$include$exclude\"$remoteUrl$remote\" \"$localDir/\" 2>&1 | tee -a \"$logDir\"/last_run.txt > \"$fileListDir/$fileListName-file-list.txt\""
 
+    # File list sanity check
+    listHead=$(head -n 1 "$fileListDir/$fileListName-file-list.txt")
+    fileLineRegex="\b([0-9]{4}/[0-9]{2}/[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) (.*)\b"
+    if ! [[ "$listHead" =~ $fileLineRegex ]]; then
+      echo "Error getting file list. See '$fileListDir/$fileListName-file-list.txt' for more details." | tee -a "$logDir"/last_run.txt
+      exit 1
+    fi
+
     # File existence / removal check
     if [[ "$comparison" != "null" ]] || [[ "$rmMissingFiles" == "true" ]]; then
       echo "Comparing file list to existing files..." | tee -a "$logDir"/last_run.txt
