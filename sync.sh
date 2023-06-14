@@ -312,7 +312,7 @@ while read -r obj; do
 
               "<filename_remote_base>")
                 basefile=$(basename -- "$f")
-                basefileClean=$(echo "$baseFile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
+                basefileClean=$(echo "$basefile" | sed -e 's/\"/\\"/g' -e 's/\$/\\$/g')
                 cmd="$cmd \"$basefileClean\""
                 ;;
 
