@@ -247,12 +247,12 @@ while read -r obj; do
           fi
         fi
 
-        if [[ "$fileExists" == "false" ]] && [[ $rmMissingFiles = true ]]; then
-          echo "Deleting nonexistent file: $existFile" | tee -a "$logDir"/last_run.txt
+        if [[ "$fileUpdated" == "true" ]]; then
+          echo "File $existFile is updated. Deleting and redownloading." | tee -a "$logDir"/last_run.txt
           rm -f "$existFile"
           fileDel=$((fileDel + 1))
-        elif [[ "$fileUpdated" == "true" ]]; then
-          echo "File $existFile is updated. Deleting and redownloading." | tee -a "$logDir"/last_run.txt
+        elif [[ "$fileExists" == "false" ]] && [[ $rmMissingFiles = true ]]; then
+          echo "Deleting nonexistent file: $existFile" | tee -a "$logDir"/last_run.txt
           rm -f "$existFile"
           fileDel=$((fileDel + 1))
         elif [[ "$fileExists" == "false" ]]; then
