@@ -48,7 +48,7 @@ Required settings are as follows:
 * `remote_url` or `remote_urls` - One or more rsync-compatible locations for files. Can be another directory on this local machine, or an rsync-compatible URL such as `rsync://some-host/` or `me@example.com:/some/dir/`. For syncing folders, **be sure this ends in a trailing slash**. If you have a single URL, specify it as `remote_url` and by default all of your configs will use this url for syncing. For multiple URLs, you can create an object in an array named `remote_urls` to designate the URL with a name.
 * `log_dir` - The directory for storing log files. Defaults to the current directory if not set. Trailing slashes are stripped and implied at runtime.
 * `file_list_dir` - The directory for storing rsync file lists. Defaults to `log_dir` if not set. Trailing slashes are stripped and implied at runtime.
-* `sync_offset_seconds` - A number of seconds to offset date-time checking for transformed files. This defaults to 0, and file times should usually be preserved across remote and local directories, so you almost never need to modify this.
+* `sync_offset_seconds` - A number of seconds to offset date-time checking for transformed files. This defaults to 0, so the main use case for ever modifying this is if you want to pretend you are further in the future than your current stored time offset.
 * `configs` - An array of individual sync configs, described below.
 
 Each URL defined in `remote_urls` has two required parameters:
